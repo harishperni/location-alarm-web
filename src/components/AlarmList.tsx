@@ -5,6 +5,8 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousTriggeredState = useRef<{[key: string]: boolean}>({});
   const [activeAlarms, setActiveAlarms] = useState<{[key: string]: boolean}>({});
+  const [vibrationSupported, setVibrationSupported] = useState(false);
+  const vibrationInterval = useRef<number | null>(null);
 
   const calculateDistance = (
     lat1: number,
@@ -26,17 +28,52 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
     return R * c; // Returns distance in meters
   };
 
+  useEffect(() => {
+    // Check if vibration is supported
+    setVibrationSupported('vibrate' in navigator);
+  }, []);
+
+  const startVibration = useCallback(() => {
+    if (!vibrationSupported) return;
+
+    // Clear any existing interval
+    if (vibrationInterval.current) {
+      clearInterval(vibrationInterval.current);
+    }
+
+    // Vibrate in a pattern: 500ms vibration, 200ms pause
+    navigator.vibrate(500);
+    vibrationInterval.current = window.setInterval(() => {
+      navigator.vibrate(500);
+    }, 700);
+  }, [vibrationSupported]);
+
+  const stopVibration = useCallback(() => {
+    if (!vibrationSupported) return;
+
+    // Stop vibration
+    navigator.vibrate(0);
+    
+    // Clear interval if it exists
+    if (vibrationInterval.current) {
+      clearInterval(vibrationInterval.current);
+      vibrationInterval.current = null;
+    }
+  }, [vibrationSupported]);
+
   const playAlarmSound = useCallback((alarmId: string) => {
     if (audioRef.current) {
       audioRef.current.loop = true;
       audioRef.current.play().then(() => {
         setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
+        startVibration();
       }).catch(error => {
         console.log('Error playing sound:', error);
         setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
+        startVibration();
       });
     }
-  }, []);
+  }, [startVibration]);
 
   const stopAlarm = useCallback((alarmId: string) => {
     if (audioRef.current) {
@@ -44,7 +81,8 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
       audioRef.current.currentTime = 0;
     }
     setActiveAlarms(prev => ({ ...prev, [alarmId]: false }));
-  }, []);
+    stopVibration();
+  }, [stopVibration]);
 
   const showNotification = (alarmName: string, distance: number) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -69,8 +107,10 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
         audioRef.current.pause();
         audioRef.current.src = '';
       }
+      // Stop vibration on unmount
+      stopVibration();
     };
-  }, []);
+  }, [stopVibration]);
 
   useEffect(() => {
     if (!currentLocation) return;

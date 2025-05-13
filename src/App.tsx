@@ -51,9 +51,9 @@ function App() {
         }
       },
       {
-        enableHighAccuracy: false,
-        timeout: 60000,
-        maximumAge: 300000
+        enableHighAccuracy: true,  // Enable high accuracy for walking tests
+        timeout: 10000,            // Reduce timeout to 10 seconds
+        maximumAge: 1000           // Only accept locations that are at most 1 second old
       }
     );
   }, [useManualLocation]);
@@ -82,9 +82,9 @@ function App() {
           startWatchingLocation();
         },
         {
-          enableHighAccuracy: false,
-          timeout: 60000,
-          maximumAge: 300000
+          enableHighAccuracy: true,  // Enable high accuracy for walking tests
+          timeout: 10000,            // Reduce timeout to 10 seconds
+          maximumAge: 1000           // Only accept locations that are at most 1 second old
         }
       );
     }

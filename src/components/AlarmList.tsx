@@ -3,7 +3,6 @@ import { AlarmListProps } from '../types';
 
 const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDeleteAlarm }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const vibrationInterval = useRef<number | null>(null);
   const previousTriggeredState = useRef<{[key: string]: boolean}>({});
   const [activeAlarms, setActiveAlarms] = useState<{[key: string]: boolean}>({});
 
@@ -27,47 +26,15 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
     return R * c; // Returns distance in meters
   };
 
-  const requestNotificationPermission = async () => {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
-    }
-    return false;
-  };
-
-  const startVibration = () => {
-    if ('vibrate' in navigator) {
-      // Clear any existing vibration interval
-      if (vibrationInterval.current) {
-        clearInterval(vibrationInterval.current);
-      }
-      
-      // Vibrate pattern: 500ms on, 200ms off
-      navigator.vibrate(500);
-      vibrationInterval.current = window.setInterval(() => {
-        navigator.vibrate(500);
-      }, 700);
-    }
-  };
-
-  const stopVibration = () => {
-    if (vibrationInterval.current) {
-      clearInterval(vibrationInterval.current);
-      vibrationInterval.current = null;
-    }
-    if ('vibrate' in navigator) {
-      navigator.vibrate(0); // Stop any ongoing vibration
-    }
-  };
-
   const playAlarmSound = (alarmId: string) => {
     if (audioRef.current) {
-      audioRef.current.loop = true; // Make the sound loop
-      audioRef.current.play().catch(error => {
+      audioRef.current.loop = true;
+      audioRef.current.play().then(() => {
+        setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
+      }).catch(error => {
         console.log('Error playing sound:', error);
+        setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
       });
-      setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
-      startVibration();
     }
   };
 
@@ -76,7 +43,6 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    stopVibration();
     setActiveAlarms(prev => ({ ...prev, [alarmId]: false }));
   };
 
@@ -91,9 +57,11 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
 
   useEffect(() => {
     // Request notification permission when component mounts
-    requestNotificationPermission();
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
 
-    // Create audio element with a longer alarm sound
+    // Create audio element
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     
     return () => {
@@ -101,7 +69,6 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
         audioRef.current.pause();
         audioRef.current.src = '';
       }
-      stopVibration();
     };
   }, []);
 

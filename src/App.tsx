@@ -41,7 +41,12 @@ function App() {
           console.log('Location update received:', position);
           setCurrentLocation(position);
           setError('');
-          setLocationStatus(`Location tracking active (Accuracy: ${position.coords.accuracy}m)`);
+          // Add speed and heading info if available
+          const speedInfo = position.coords.speed ? `, Speed: ${(position.coords.speed * 3.6).toFixed(1)} km/h` : '';
+          const headingInfo = position.coords.heading ? `, Heading: ${position.coords.heading.toFixed(0)}°` : '';
+          setLocationStatus(
+            `Location tracking active (Accuracy: ${position.coords.accuracy.toFixed(1)}m${speedInfo}${headingInfo})`
+          );
         }
       },
       (err) => {
@@ -51,9 +56,9 @@ function App() {
         }
       },
       {
-        enableHighAccuracy: true,  // Keep high accuracy for continuous tracking
-        timeout: 10000,            // 10 second timeout
-        maximumAge: 1000           // 1 second update frequency
+        enableHighAccuracy: true,    // Keep high accuracy mode
+        timeout: 10000,              // 10 second timeout
+        maximumAge: 1000             // 1 second update frequency
       }
     );
   }, [useManualLocation]);
@@ -72,7 +77,11 @@ function App() {
           console.log('Initial position received:', position);
           setCurrentLocation(position);
           setError('');
-          setLocationStatus(`Location received (Accuracy: ${position.coords.accuracy}m)`);
+          const speedInfo = position.coords.speed ? `, Speed: ${(position.coords.speed * 3.6).toFixed(1)} km/h` : '';
+          const headingInfo = position.coords.heading ? `, Heading: ${position.coords.heading.toFixed(0)}°` : '';
+          setLocationStatus(
+            `Location received (Accuracy: ${position.coords.accuracy.toFixed(1)}m${speedInfo}${headingInfo})`
+          );
           startWatchingLocation();  // Start high-accuracy tracking after initial position
         },
         (err) => {

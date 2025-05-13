@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/location-alarm-web/static/css/main.2fd1fbf5.css",
-    "main.js": "/location-alarm-web/static/js/main.c469e74f.js",
+    "main.js": "/location-alarm-web/static/js/main.18fcbee2.js",
     "static/js/453.02990f23.chunk.js": "/location-alarm-web/static/js/453.02990f23.chunk.js",
     "index.html": "/location-alarm-web/index.html",
     "main.2fd1fbf5.css.map": "/location-alarm-web/static/css/main.2fd1fbf5.css.map",
-    "main.c469e74f.js.map": "/location-alarm-web/static/js/main.c469e74f.js.map",
+    "main.18fcbee2.js.map": "/location-alarm-web/static/js/main.18fcbee2.js.map",
     "453.02990f23.chunk.js.map": "/location-alarm-web/static/js/453.02990f23.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2fd1fbf5.css",
-    "static/js/main.c469e74f.js"
+    "static/js/main.18fcbee2.js"
   ]
 }

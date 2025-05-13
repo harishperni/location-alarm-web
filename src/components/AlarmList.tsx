@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AlarmListProps } from '../types';
 
 const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDeleteAlarm }) => {
@@ -26,7 +26,7 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
     return R * c; // Returns distance in meters
   };
 
-  const playAlarmSound = (alarmId: string) => {
+  const playAlarmSound = useCallback((alarmId: string) => {
     if (audioRef.current) {
       audioRef.current.loop = true;
       audioRef.current.play().then(() => {
@@ -36,15 +36,15 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
         setActiveAlarms(prev => ({ ...prev, [alarmId]: true }));
       });
     }
-  };
+  }, []);
 
-  const stopAlarm = (alarmId: string) => {
+  const stopAlarm = useCallback((alarmId: string) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
     setActiveAlarms(prev => ({ ...prev, [alarmId]: false }));
-  };
+  }, []);
 
   const showNotification = (alarmName: string, distance: number) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -98,7 +98,7 @@ const AlarmList: React.FC<AlarmListProps> = ({ alarms, currentLocation, onDelete
       // Update the triggered state
       previousTriggeredState.current[alarm.id] = isTriggered;
     });
-  }, [alarms, currentLocation]);
+  }, [alarms, currentLocation, playAlarmSound, stopAlarm]);
 
   const handleViewOnMap = (latitude: number, longitude: number) => {
     window.open(

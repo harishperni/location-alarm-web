@@ -33,6 +33,31 @@ function App() {
     setUseManualLocation(true);
   };
 
+  const startWatchingLocation = useCallback(() => {
+    console.log('Starting location watch');
+    return navigator.geolocation.watchPosition(
+      (position) => {
+        if (!useManualLocation) {
+          console.log('Location update received:', position);
+          setCurrentLocation(position);
+          setError('');
+          setLocationStatus(`Location tracking active (Accuracy: ${position.coords.accuracy}m)`);
+        }
+      },
+      (err) => {
+        console.error('Watch position error:', err);
+        if (!useManualLocation) {
+          handleLocationError(err);
+        }
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 60000,
+        maximumAge: 300000
+      }
+    );
+  }, [useManualLocation]);
+
   const requestLocation = useCallback(() => {
     if (useManualLocation) {
       simulateLocation();
@@ -63,32 +88,7 @@ function App() {
         }
       );
     }
-  }, [useManualLocation]);
-
-  const startWatchingLocation = () => {
-    console.log('Starting location watch');
-    return navigator.geolocation.watchPosition(
-      (position) => {
-        if (!useManualLocation) {
-          console.log('Location update received:', position);
-          setCurrentLocation(position);
-          setError('');
-          setLocationStatus(`Location tracking active (Accuracy: ${position.coords.accuracy}m)`);
-        }
-      },
-      (err) => {
-        console.error('Watch position error:', err);
-        if (!useManualLocation) {
-          handleLocationError(err);
-        }
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 60000,
-        maximumAge: 300000
-      }
-    );
-  };
+  }, [useManualLocation, startWatchingLocation]);
 
   const handleLocationError = (err: GeolocationPositionError) => {
     let errorMessage = 'Error getting location: ';

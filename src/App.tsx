@@ -51,9 +51,9 @@ function App() {
         }
       },
       {
-        enableHighAccuracy: true,  // Enable high accuracy for walking tests
-        timeout: 10000,            // Reduce timeout to 10 seconds
-        maximumAge: 1000           // Only accept locations that are at most 1 second old
+        enableHighAccuracy: true,  // Keep high accuracy for continuous tracking
+        timeout: 10000,            // 10 second timeout
+        maximumAge: 1000           // 1 second update frequency
       }
     );
   }, [useManualLocation]);
@@ -73,7 +73,7 @@ function App() {
           setCurrentLocation(position);
           setError('');
           setLocationStatus(`Location received (Accuracy: ${position.coords.accuracy}m)`);
-          startWatchingLocation();
+          startWatchingLocation();  // Start high-accuracy tracking after initial position
         },
         (err) => {
           console.error('Location request failed:', err);
@@ -82,9 +82,9 @@ function App() {
           startWatchingLocation();
         },
         {
-          enableHighAccuracy: true,  // Enable high accuracy for walking tests
-          timeout: 10000,            // Reduce timeout to 10 seconds
-          maximumAge: 1000           // Only accept locations that are at most 1 second old
+          enableHighAccuracy: false, // Use lower accuracy for faster initial position
+          timeout: 5000,             // Shorter timeout for initial position
+          maximumAge: 10000          // Accept positions up to 10 seconds old for initial request
         }
       );
     }

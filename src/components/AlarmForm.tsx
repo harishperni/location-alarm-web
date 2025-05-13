@@ -134,11 +134,11 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
           onChange={(e) => setRadiusKm(e.target.value)}
           required
           min="0.1"
-          max="10"
+          max="100"
           step="0.1"
           placeholder="Enter distance in kilometers"
         />
-        <small className="input-help">Enter a value between 0.1 and 10 kilometers</small>
+        <small className="input-help">Enter a value between 0.1 and 100 kilometers</small>
       </div>
 
       <button 

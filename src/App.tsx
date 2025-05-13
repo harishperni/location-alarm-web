@@ -41,11 +41,8 @@ function App() {
           console.log('Location update received:', position);
           setCurrentLocation(position);
           setError('');
-          // Add speed and heading info if available
-          const speedInfo = position.coords.speed ? `, Speed: ${(position.coords.speed * 3.6).toFixed(1)} km/h` : '';
-          const headingInfo = position.coords.heading ? `, Heading: ${position.coords.heading.toFixed(0)}°` : '';
           setLocationStatus(
-            `Location tracking active (Accuracy: ${position.coords.accuracy.toFixed(1)}m${speedInfo}${headingInfo})`
+            `Location tracking active (Accuracy: ${position.coords.accuracy.toFixed(1)}m)`
           );
         }
       },
@@ -77,10 +74,8 @@ function App() {
           console.log('Initial position received:', position);
           setCurrentLocation(position);
           setError('');
-          const speedInfo = position.coords.speed ? `, Speed: ${(position.coords.speed * 3.6).toFixed(1)} km/h` : '';
-          const headingInfo = position.coords.heading ? `, Heading: ${position.coords.heading.toFixed(0)}°` : '';
           setLocationStatus(
-            `Location received (Accuracy: ${position.coords.accuracy.toFixed(1)}m${speedInfo}${headingInfo})`
+            `Location received (Accuracy: ${position.coords.accuracy.toFixed(1)}m)`
           );
           startWatchingLocation();  // Start high-accuracy tracking after initial position
         },

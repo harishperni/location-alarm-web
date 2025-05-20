@@ -217,7 +217,7 @@ function App() {
             </div>
           </div>
         )}
-        <AlarmForm onAddAlarm={handleAddAlarm} />
+        <AlarmForm onAddAlarm={handleAddAlarm} currentLocation={currentLocation} />
         <AlarmList 
           alarms={alarms} 
           currentLocation={currentLocation} 

@@ -23,6 +23,7 @@
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "start-https": "HTTPS=true SSL_CRT_FILE=certificates/cert.pem SSL_KEY_FILE=certificates/key.pem HOST=0.0.0.0 react-scripts start",
+    "start-network": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

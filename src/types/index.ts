@@ -14,6 +14,7 @@ export interface LocationError {
 
 export interface AlarmFormProps {
   onAddAlarm: (alarm: LocationAlarm) => void;
+  currentLocation: GeolocationPosition | null;
 }
 
 export interface AlarmListProps {

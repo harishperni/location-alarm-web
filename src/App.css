@@ -466,3 +466,92 @@ body {
     background-color: rgba(231, 76, 60, 0.1);
   }
 }
+
+.search-container {
+  position: relative;
+  flex: 1;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card-background);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--shadow);
+}
+
+.search-result-item {
+  padding: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background-color: #f8fafc;
+}
+
+.result-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.result-details {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.result-details span {
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Dark mode support for search results */
+@media (prefers-color-scheme: dark) {
+  .search-results-dropdown {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .search-result-item {
+    border-color: #404040;
+  }
+
+  .search-result-item:hover {
+    background-color: #333333;
+  }
+
+  .result-details span {
+    background-color: #404040;
+  }
+}
+
+.distance-badge {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* Dark mode support for distance badge */
+@media (prefers-color-scheme: dark) {
+  .distance-badge {
+    background-color: var(--primary-color) !important;
+  }
+}

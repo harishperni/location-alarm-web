@@ -1,13 +1,51 @@
 import React, { useState } from 'react';
 import { AlarmFormProps, LocationAlarm } from '../types';
 
-const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
+interface SearchResult {
+  lat: number;
+  lon: number;
+  display_name: string;
+  state?: string;
+  district?: string;
+  country?: string;
+}
+
+const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm, currentLocation }) => {
   const [name, setName] = useState('');
   const [radiusKm, setRadiusKm] = useState('1');
   const [destination, setDestination] = useState('');
   const [destinationCoords, setDestinationCoords] = useState<{lat: number, lng: number} | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Returns distance in meters
+  };
+
+  const formatDistance = (meters: number): string => {
+    if (meters < 1000) {
+      return `${Math.round(meters)}m`;
+    }
+    return `${(meters / 1000).toFixed(1)}km`;
+  };
 
   const searchLocation = async () => {
     if (!destination.trim()) {
@@ -20,25 +58,27 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=5`
       );
       const data = await response.json();
       
       if (data && data.length > 0) {
-        setDestinationCoords({
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        });
+        setSearchResults(data);
+        setShowDropdown(true);
         setSearchError('');
         return true;
       } else {
         setSearchError('Location not found. Please try a different search.');
         setDestinationCoords(null);
+        setSearchResults([]);
+        setShowDropdown(false);
         return false;
       }
     } catch (error) {
       setSearchError('Error searching location. Please try again.');
       setDestinationCoords(null);
+      setSearchResults([]);
+      setShowDropdown(false);
       return false;
     } finally {
       setSearching(false);
@@ -49,11 +89,22 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
     setDestination(e.target.value);
     setDestinationCoords(null);
     setSearchError('');
+    setSearchResults([]);
+    setShowDropdown(false);
   };
 
   const handleSearchClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     await searchLocation();
+  };
+
+  const handleResultSelect = (result: SearchResult) => {
+    setDestinationCoords({
+      lat: parseFloat(result.lat.toString()),
+      lng: parseFloat(result.lon.toString())
+    });
+    setDestination(result.display_name);
+    setShowDropdown(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +131,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
     setRadiusKm('1');
     setDestination('');
     setDestinationCoords(null);
+    setSearchResults([]);
   };
 
   return (
@@ -99,15 +151,51 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onAddAlarm }) => {
       <div className="form-group">
         <label htmlFor="destination">Destination:</label>
         <div className="destination-input-group">
-          <input
-            type="text"
-            id="destination"
-            value={destination}
-            onChange={handleDestinationChange}
-            required
-            placeholder="Enter city, town, or place name"
-            className={destinationCoords ? 'location-found' : ''}
-          />
+          <div className="search-container">
+            <input
+              type="text"
+              id="destination"
+              value={destination}
+              onChange={handleDestinationChange}
+              required
+              placeholder="Enter city, town, or place name"
+              className={destinationCoords ? 'location-found' : ''}
+            />
+            {showDropdown && searchResults.length > 0 && (
+              <div className="search-results-dropdown">
+                {searchResults.map((result, index) => {
+                  const distance = currentLocation
+                    ? calculateDistance(
+                        currentLocation.coords.latitude,
+                        currentLocation.coords.longitude,
+                        parseFloat(result.lat.toString()),
+                        parseFloat(result.lon.toString())
+                      )
+                    : null;
+
+                  return (
+                    <div
+                      key={index}
+                      className="search-result-item"
+                      onClick={() => handleResultSelect(result)}
+                    >
+                      <div className="result-name">{result.display_name}</div>
+                      <div className="result-details">
+                        {result.state && <span>{result.state}</span>}
+                        {result.district && <span>{result.district}</span>}
+                        {result.country && <span>{result.country}</span>}
+                        {distance !== null && (
+                          <span className="distance-badge">
+                            {formatDistance(distance)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <button 
             type="button" 
             onClick={handleSearchClick}
